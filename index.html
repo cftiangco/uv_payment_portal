@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UV Express Payment</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="font-mono">
+    <div id="root"></div>
+
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        /*==================================================== COMPONENTS  ====================================================*/
+
+        /* TEXT INPUT */
+        const InputText = ({ placeholder, onChange, type }) => {
+            return (
+                <input type={type}
+                    className="border border-blue-400 w-full h-10 rounded p-3"
+                    placeholder={placeholder}
+                    onChange={onChange}
+                />
+            );
+        }
+
+        /* MY BUTTON */
+        const MyButton = ({ label, onClick, value }) => {
+            return (
+                <button
+                    type="button"
+                    className={'shadow w-full py-3 bg-blue-400 rounded-md font-bold text-white'}
+                    onClick={onClick}
+                    value={value}
+                >
+                    {label}
+                </button>
+            )
+        }
+
+        /* PRICE CARD */
+        const PriceCard = ({ data, onClick, activeIndex }) => {
+            return (
+                <div
+                    className={`p-5 shadow-lg w-40 bg-blue-300 rounded-tl-xl text-white text-center ${data.id === activeIndex ? 'border-4 border-green-300 bg-blue-500 animate-bounce' : null}`}
+                    onClick={() => onClick(data.id)}
+                >{data.description}</div>
+            )
+        }
+
+        /* CHECKOUT BUTTON */
+        const CheckOutButton = ({ label, isActive, onClick }) => {
+            return (
+                <button type="button"
+                    className={`${isActive ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-300'} w-80 mt-5  font-bold rounded-xl h-10 shadow-lg `}
+                    onClick={onClick}
+                >{label}</button>
+            );
+        }
+
+        /* BALANCE VIEW */
+        const BalanceView = ({ balance }) => {
+            return (
+                <div className={'text-center mb-5'}>
+                    <h4 className={'text-blue-500 mb-5 font-bold text-xl'}>Current Balance: {balance.toFixed(2)}</h4>
+                    <small className="">Please select amount of load</small>
+                </div>
+            )
+        }
+
+        /* LOADING */
+        const Loading = ({ label }) => {
+            return (
+                <div className="absolute flex h-screen w-full justify-center z-10">
+                    <div className="absolute bg-gray-100 bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
+                        <div className="flex items-center">
+                            <span className="text-2xl mr-4 font-semibold text-gray-700">{label}</span>
+                            <svg className="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        /*==================================================== PAGES  ====================================================*/
+
+        /* LOGIN */
+        const Login = ({ onLogin }) => {
+
+            const [username, setUsername] = useState("");
+            const [password, setPassword] = useState("");
+
+            const handleOnChangeUserName = (value) => {
+                setUsername(value);
+            }
+
+            const handleOnChangePassword = (value) => {
+                setPassword(value);
+            }
+
+            useEffect(() => {
+
+            }, [username, password])
+
+            return (
+                <div className="flex flex-col h-screen items-center justify-center mx-3">
+
+                    <div className={'text-center text-blue-400 mb-5 font-bold text-xl'}>
+                        <h4>UV Express Top-up</h4>
+                    </div>
+
+                    <InputText
+                        placeholder={"Username"}
+                        onChange={(e) => handleOnChangeUserName(e.target.value)}
+                        type={'text'}
+                        value={username}
+                    />
+                    <br />
+
+                    <InputText
+                        placeholder={"Password"}
+                        onChange={(e) => handleOnChangePassword(e.target.value)}
+                        type={'password'}
+                        value={password}
+                    />
+
+                    <br />
+
+                    <MyButton
+                        label={'LOGIN'}
+                        onClick={() => onLogin(username, password)}
+                    />
+
+                </div>
+            )
+        }
+
+        /* PRICING */
+        const Pricing = ({ priceList, onClick, activeIndex, onClickCheckOut }) => {
+            return (
+                <div className="flex flex-col h-screen items-center justify-center mx-3">
+                    <BalanceView balance={550.00} />
+                    <div className="grid grid-cols-2 gap-2">
+                        {priceList.map((price, index) =>
+                            <PriceCard
+                                key={index}
+                                data={price}
+                                onClick={onClick}
+                                activeIndex={activeIndex}
+                            />
+                        )}
+
+                    </div>
+
+                    <CheckOutButton
+                        label={"CHECK OUT"}
+                        isActive={activeIndex > 0 ? true : false}
+                        onClick={onClickCheckOut}
+                    />
+
+                </div>
+            );
+        }
+
+        /*==================================================== MAIN  ====================================================*/
+        function App() {
+            const [login, setLogin] = useState();
+            const [activeIndex, setActiveIndex] = useState(0);
+            const [loader,setLoader] = useState(false);
+
+            const priceList = [
+                { id: 1, description: 'P50.00', price: 50 },
+                { id: 2, description: 'P100.00', price: 100 },
+                { id: 3, description: 'P200.00', price: 200 },
+                { id: 4, description: 'P300.00', price: 300 },
+                { id: 5, description: 'P400.00', price: 400 },
+                { id: 6, description: 'P500.00', price: 500 },
+                { id: 7, description: 'P1,000.00', price: 1000 },
+                { id: 8, description: 'P2,000.00', price: 2000 },
+            ];
+
+            const handleLogin = (username, password) => {
+                console.log(username, password);
+                setLoader(true);
+                setTimeout(() => {
+                    setLogin(true);
+                    setLoader(false);
+                },2000)  
+            }
+
+            const handleOnClickPrice = (index) => {
+                const price = priceList[index - 1];
+                setActiveIndex(index);
+            }
+
+            const handleOnClickCheckOut = () => {
+
+                if(activeIndex > 0) {
+                    const price = priceList[activeIndex - 1];
+                    console.log(price);
+                    setLoader(true);
+                }
+                
+            }
+
+            return (
+                <div className="container">
+
+                    <div className="absolute -top-36 -left-40 w-72 h-72 bg-blue-200 rounded-full overflow-hidden z-0"></div>
+
+                    {loader ? <Loading label="Please wait" />:null}
+
+                    {login ?
+                        <Pricing
+                            priceList={priceList}
+                            onClick={handleOnClickPrice}
+                            activeIndex={activeIndex}
+                            onClickCheckOut={handleOnClickCheckOut}
+                        /> :
+                        <Login
+                            onLogin={handleLogin}
+                        />
+                    }
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />)
+    </script>
+
+</body>
+
+</html>
